@@ -31,7 +31,7 @@ PubSub.prototype.unsubscribe = function(eventName, handler) {
  * @return Boolean              удачен ли результат операции
  */
 PubSub.prototype.publish = function(eventName, data) {
-    // body...
+    // body…
 };
 
 /**
@@ -60,7 +60,8 @@ PubSub.prototype.off = function(eventName) {
  */
 
 /*
-    Дополнительный вариант: нужно заставить работать методы верно
+    Дополнительный вариант — без явного использования глобального объекта
+    нужно заставить работать методы верно у любой функции
  */
 
 function foo(event, data) {
