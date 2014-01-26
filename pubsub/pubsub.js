@@ -1,62 +1,60 @@
 /**
  * Конструктор класса обмена сообщениями
+ * @constructor
  */
 function PubSub(){
 };
 
 /**
  * Функция подписки на событие
- * @param  String eventName     имя события
- * @param  Function handler     функция которая будет вызвана при возникновении события
- * @return Function             ссылка на handler
+ * @param  {string} eventName имя события
+ * @param  {function} handler функция которая будет вызвана при возникновении события
+ * @return {function}         ссылка на handler
  */
 PubSub.prototype.subscribe = function(eventName, handler) {
-    // body…
+    return handler;
 };
 
 /**
  * Функция отписки от события
- * @param  String eventName     имя события
- * @param  Function handler     функция которая будет отписана
- * @return Function             ссылка на handler
+ * @param  {string} eventName имя события
+ * @param  {function} handler функция которая будет отписана
+ * @return {function}         ссылка на handler
  */
 PubSub.prototype.unsubscribe = function(eventName, handler) {
-    // body…
+    return handler;
 };
 
 /**
  * Функция генерирующая событие
- * @param  String eventName     имя события
- * @param  Any data             данные для обработки соответствующими функциями
- * @return Boolean              удачен ли результат операции
+ * @param  {string} eventName имя события
+ * @param  {object} data      данные для обработки соответствующими функциями
+ * @return {bool}             удачен ли результат операции
  */
 PubSub.prototype.publish = function(eventName, data) {
-    // body…
+    return false;
 };
 
 /**
  * Функция отписывающая все функции от определённого события
- * @param  String eventName     имя события
- * @return Boolean              удачен ли результат операции
+ * @param  {string} eventName имя события
+ * @return {bool}             удачен ли результат операции
  */
 PubSub.prototype.off = function(eventName) {
-    // body…
+    return false;
 };
 
-/*
-    Примеры использования
-
-    Подписать группу функций на событие 'click':
-
-    PubSub.subscribe('click', function(event, data) { … });
-    var second = PubSub.subscribe('click', function(event, data) { … });
-
-    Отписать одну функцию от события 'click':
-    PubSub.unsubscribe('click', second);
-
-    Отписать группу функций от события 'click'
-    PubSub.off('click');
-
+/**
+ * @example
+ *
+ * PubSub.subscribe('click', function(event, data) { console.log(data) });
+ * var second = PubSub.subscribe('click', function(event, data) { console.log(data) });
+ *
+ * //Отписать одну функцию от события 'click':
+ * PubSub.unsubscribe('click', second);
+ *
+ * //Отписать группу функций от события 'click'
+ * PubSub.off('click');
  */
 
 /*
