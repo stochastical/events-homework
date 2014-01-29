@@ -28,6 +28,15 @@
 		var eventRouter = new PubSub();
 		var output;
 
+		function worker() {
+			var p = Math.random() * 1000000 + 1000000;
+			var i, l = 0;
+			for (i=0; i<p; i++) {
+				l += Math.log( Math.sin(l * i) + p )
+			}
+			return l;
+		}
+
 		function writer(text) {
 			var p;
 			if (!(output instanceof Element)) {
@@ -39,33 +48,44 @@
 		}
 
 		function foo(event, data) {
+			worker();
 			writer("foo: " + data);
+		}
+
+		function timer(event, data) {
+			console.timeEnd('counter');
+			worker();
+			writer("timer: " + data);
 		}
 
 
 		function makeOne() {
 		return function one(event, data) {
-		  writer("one: " + data);  
+			worker();
+		 	writer("one: " + data);  
 		}
 		}
 
 		var one1 = makeOne();
 
 		function one(event, data) {
-		  writer("one: " + data);  
+			worker();
+			writer("one: " + data);  
 		}
 
 		function two(event, data) {
-		  writer("two: " + data);
+			worker();
+		 	writer("two: " + data);
 		}
 
-
+		console.time('counter');
 		eventRouter.subscribe("click", one);
 		eventRouter.subscribe("click", two);
 		eventRouter.subscribe("click", one1);
 		eventRouter.subscribe("click", one);
 
 		eventRouter.subscribe("click", one);
+		eventRouter.subscribe("click", timer);
 
 		writer("Firing event 'click', should be one, two, one1");
 		eventRouter.publish("click", "click data");
@@ -73,6 +93,7 @@
 		eventRouter.subscribe("move", one);
 		writer("Firing event 'move', should be one");
 		eventRouter.publish("move", "move data");
+	
 		eventRouter.subscribe("move", two);
 		eventRouter.unsubscribe("move", one);
 
@@ -80,23 +101,23 @@
 
 		writer("Firing event 'move', should be two");
 		eventRouter.publish("move", "move data2");
-
 		eventRouter.off("click");
 		writer("Firing event 'click', should be none");
 		eventRouter.publish("click", "click data");
-
-
+	
 		writer("Second part of task");
 		foo.subscribe('click');
 		two.subscribe('click');
 
 		writer("Firing event 'click', should be foo, two");
-		GlobalPubSub().publish('click', 'global event');
-
+		foo.globalEventRouter.publish('click', 'global event');
+	
 		foo.unsubscribe('click');
 
 		writer("Firing event 'click', should be two");
-		GlobalPubSub().publish('click', 'global event');
+		foo.globalEventRouter.publish('click', 'global event');
+
+		
 
 	</script>
   </body>

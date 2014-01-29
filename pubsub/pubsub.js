@@ -3,9 +3,8 @@
  * @constructor
  */
 function PubSub(){
+	this.table = {};					// таблица всех событий
 };
-
-
 
 /**
  * Функция подписки на событие
@@ -16,7 +15,6 @@ function PubSub(){
 PubSub.prototype.subscribe = function(eventName, handler) {
 	var etable, i;
 	if ( (eventName == undefined) || (! handler instanceof Function) ) return handler;
-	if (this.table === undefined) this.table = {};						// таблица всех событий
 	if (this.table[eventName] === undefined) this.table[eventName] = [];// список обработчиков данного события
 	etable = this.table[eventName];										
 	if ( etable.indexOf(handler) === -1 ) {
@@ -33,9 +31,8 @@ PubSub.prototype.subscribe = function(eventName, handler) {
  */
 PubSub.prototype.unsubscribe = function(eventName, handler) {
 	var etable, i;
-	if ( (eventName != undefined) && ( handler instanceof Function) &&
-		 (this.table !== undefined) && (this.table[eventName] !== undefined) ) {
-			etable = this.table[eventName];
+	etable = this.table[eventName];
+	if ( etable !== undefined ) {
 			i = etable.indexOf(handler);
 			if ( i > -1 ) {
 				etable.splice(i, 1);
@@ -51,13 +48,16 @@ PubSub.prototype.unsubscribe = function(eventName, handler) {
  * @return {bool}             удачен ли результат операции
  */
 PubSub.prototype.publish = function(eventName, data) {
-	var etable, i, wasFound = false;
-	if ( (eventName != undefined) && (this.table !== undefined) && (this.table[eventName] !== undefined) ) {
-		etable = this.table[eventName];
-		if ( etable.length>0 ) wasFound = true;
-		for (i=0; i < etable.length; i++) {
-			etable[i](eventName, data);
-		}
+	function starter( func ) {
+		setTimeout( function() { 
+			func(eventName, data);
+			 }, 1);
+	}
+	var etable, wasFound = false;
+	etable = this.table[eventName];
+	if ( (etable !== undefined) && ( etable.length>0 ) ) {
+		wasFound = true;
+		etable.forEach(starter);
 	}
     return wasFound;
 };
@@ -68,8 +68,8 @@ PubSub.prototype.publish = function(eventName, data) {
  * @return {bool}             удачен ли результат операции
  */
 PubSub.prototype.off = function(eventName) {
-	if ( (this.table !== undefined) && (this.table[eventName] !== undefined) ) {
-		delete this.table[eventName];
+	if ( (this.table[eventName] !== undefined) ) {
+		this.table[eventName] = undefined;
 		return true;
 	}
     return false;
@@ -88,10 +88,6 @@ PubSub.prototype.off = function(eventName) {
  * PubSub.off('click');
  */
 
-
-
-
-
 /*
     Дополнительный вариант — без явного использования глобального объекта
     нужно заставить работать методы верно у любой функции.
@@ -101,25 +97,16 @@ PubSub.prototype.off = function(eventName) {
 
 
 /* 
-	Creating a singleton
-	Его можно завернуть внутрь замыкания, чтобы вобще не было видно, 
-	но тогда механизм для генерации событий не доступен.
+	Глобальный менеджер событий в прототипе функций
 */
-GlobalPubSub = (function() {
-	var globalEventRouter;
-	return function() {
-		if (globalEventRouter === undefined)
-			globalEventRouter = new PubSub();
-		return globalEventRouter;
-	}
-}());
+Function.prototype.globalEventRouter = new PubSub();
 
 
  Function.prototype.subscribe = function(eventName) {
- 	return GlobalPubSub().subscribe(eventName, this);
+ 	return this.globalEventRouter.subscribe(eventName, this);
  }
 
  Function.prototype.unsubscribe = function(eventName) {
- 	return GlobalPubSub().unsubscribe(eventName, this);
+ 	return this.globalEventRouter.unsubscribe(eventName, this);
  }
 
