@@ -2,20 +2,10 @@
  * Конструктор класса обмена сообщениями
  * @constructor
  */
-//function PubSub(){
-//};
+function PubSub(){
+};
 
-/* 
-	Now it is a singleton
-*/
-PubSub = (function() {
-	var globalEventRouter;
-	return function() {
-		if (globalEventRouter === undefined)
-			globalEventRouter = {};
-		return globalEventRouter;
-	}
-}());
+
 
 /**
  * Функция подписки на событие
@@ -192,19 +182,33 @@ eventRouter.publish("click", "click data");
 
 /*
     Дополнительный вариант — без явного использования глобального объекта
-    нужно заставить работать методы верно у любой функции
+    нужно заставить работать методы верно у любой функции.
+
+    Способ решения не оговаривается, поэтому...
  */
 
 
-
+/* 
+	Creating a singleton
+	Его можно завернуть внутрь замыкания, чтобы вобще не было видно, 
+	но тогда механизм для генерации событий не доступен.
+*/
+GlobalPubSub = (function() {
+	var globalEventRouter;
+	return function() {
+		if (globalEventRouter === undefined)
+			globalEventRouter = new PubSub();
+		return globalEventRouter;
+	}
+}());
 
 
  Function.prototype.subscribe = function(eventName) {
- 	return PubSub().subscribe(eventName, this);
+ 	return GlobalPubSub().subscribe(eventName, this);
  }
 
  Function.prototype.unsubscribe = function(eventName) {
- 	return PubSub().unsubscribe(eventName, this);
+ 	return GlobalPubSub().unsubscribe(eventName, this);
  }
 
 
@@ -213,6 +217,8 @@ eventRouter.publish("click", "click data");
 foo.subscribe('click');
 two.subscribe('click');
 
-PubSub().publish('click', 'global event')
+GlobalPubSub().publish('click', 'global event');
 
 foo.unsubscribe('click');
+
+GlobalPubSub().publish('click', 'global event');
