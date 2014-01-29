@@ -49,9 +49,7 @@ PubSub.prototype.unsubscribe = function(eventName, handler) {
  */
 PubSub.prototype.publish = function(eventName, data) {
 	function starter( func ) {
-		setTimeout( function() { 
-			func(eventName, data);
-			 }, 1);
+		setTimeout( function() { func(eventName, data); }, 1);
 	}
 	var etable, wasFound = false;
 	etable = this.table[eventName];
@@ -90,7 +88,7 @@ PubSub.prototype.off = function(eventName) {
 
 /*
     Дополнительный вариант — без явного использования глобального объекта
-    нужно заставить работать методы верно у любой функции.
+    нужно заставить работать методы верно у любой функции
 
     Способ решения не оговаривается, поэтому...
  */
