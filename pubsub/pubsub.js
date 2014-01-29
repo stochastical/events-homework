@@ -33,9 +33,8 @@ PubSub.prototype.subscribe = function(eventName, handler) {
  */
 PubSub.prototype.unsubscribe = function(eventName, handler) {
 	var etable, i;
-	if ( (eventName == undefined) || (! handler instanceof Function) ) return handler;
-	if ( (this.table !== undefined) && (this.table[eventName] !== undefined) &&
-		(this.table[eventName][handler] !== undefined) ) {
+	if ( (eventName != undefined) && ( handler instanceof Function) &&
+		 (this.table !== undefined) && (this.table[eventName] !== undefined) ) {
 			etable = this.table[eventName];
 			i = etable.indexOf(handler);
 			if ( i > -1 ) {
@@ -91,56 +90,6 @@ PubSub.prototype.off = function(eventName) {
 
 
 
-var eventRouter = new PubSub();
-
-function foo(event, data) {
-    console.log("foo: " + data);
-}
-
-
-function makeOne() {
-return function one(event, data) {
-	console.log("one: " + data);	
-}
-}
-
-var one1 = makeOne();
-
-function one(event, data) {
-	console.log("one: " + data);	
-}
-
-function two(event, data) {
-	console.log("two: " + data);
-}
-
-
-eventRouter.subscribe("click", one);
-eventRouter.subscribe("click", two);
-eventRouter.subscribe("click", one1);
-eventRouter.subscribe("click", one);
-
-eventRouter.subscribe("click", one);
-
-console.log("Firing event 'click', should be one, two, one1\n");
-eventRouter.publish("click", "click data");
-
-eventRouter.subscribe("move", one);
-console.log("Firing event 'move', should be one\n");
-eventRouter.publish("move", "move data");
-eventRouter.subscribe("move", two);
-eventRouter.unsubscribe("move", one);
-
-eventRouter.unsubscribe("move", one);
-
-console.log("Firing event 'move', should be two\n");
-eventRouter.publish("move", "move data2");
-
-eventRouter.off("click");
-console.log("Firing event 'click', should be none\n");
-eventRouter.publish("click", "click data");
-
-
 
 
 /*
@@ -174,14 +123,3 @@ GlobalPubSub = (function() {
  	return GlobalPubSub().unsubscribe(eventName, this);
  }
 
-
-
-
-foo.subscribe('click');
-two.subscribe('click');
-
-GlobalPubSub().publish('click', 'global event');
-
-foo.unsubscribe('click');
-
-GlobalPubSub().publish('click', 'global event');

@@ -1,25 +1,103 @@
 ﻿<!DOCTYPE html>
 <html>
   <head>
-    <meta charset=utf-8>
-    <title>(Это title) Пример страницы на HTML5</title>
-    <script type="text/javascript" src="pubsub.js"></script>
+	<meta charset=utf-8>
+	<title>Задание по событиям</title>
+	<script type="text/javascript" src="pubsub.js"></script>
+	
   </head>
   <body>
-    <header>
-      <hgroup>
-         <h1>Заголовок</h1>
-      </hgroup>
-    </header>
-    <section>
+	<header>
+	  <hgroup>
+		 <h1>Заголовок</h1>
+	  </hgroup>
+	</header>
+	<section  id="output">
 
-    </section>
-    <footer>
+	</section>
+	<footer>
 <!--		<div class="vcard sign">
 		<span class="title">Вёрстка</span>:
 		<span class="fn nickname">Фурсенко Александр</span>
 		(<span class="email">alex@tnu.edu.ua</span>)
 -->
-    </footer>
+	</footer>
+	<script type="text/javascript">
+
+		
+		var eventRouter = new PubSub();
+		var output;
+
+		function writer(text) {
+			var p;
+			if (!(output instanceof Element)) {
+				output = document.getElementById('output');
+			}
+			p = document.createElement('p');
+			p.appendChild(document.createTextNode(text));
+			output.appendChild( p );
+		}
+
+		function foo(event, data) {
+			writer("foo: " + data);
+		}
+
+
+		function makeOne() {
+		return function one(event, data) {
+		  writer("one: " + data);  
+		}
+		}
+
+		var one1 = makeOne();
+
+		function one(event, data) {
+		  writer("one: " + data);  
+		}
+
+		function two(event, data) {
+		  writer("two: " + data);
+		}
+
+
+		eventRouter.subscribe("click", one);
+		eventRouter.subscribe("click", two);
+		eventRouter.subscribe("click", one1);
+		eventRouter.subscribe("click", one);
+
+		eventRouter.subscribe("click", one);
+
+		writer("Firing event 'click', should be one, two, one1");
+		eventRouter.publish("click", "click data");
+
+		eventRouter.subscribe("move", one);
+		writer("Firing event 'move', should be one");
+		eventRouter.publish("move", "move data");
+		eventRouter.subscribe("move", two);
+		eventRouter.unsubscribe("move", one);
+
+		eventRouter.unsubscribe("move", one);
+
+		writer("Firing event 'move', should be two");
+		eventRouter.publish("move", "move data2");
+
+		eventRouter.off("click");
+		writer("Firing event 'click', should be none");
+		eventRouter.publish("click", "click data");
+
+
+		writer("Second part of task");
+		foo.subscribe('click');
+		two.subscribe('click');
+
+		writer("Firing event 'click', should be foo, two");
+		GlobalPubSub().publish('click', 'global event');
+
+		foo.unsubscribe('click');
+
+		writer("Firing event 'click', should be two");
+		GlobalPubSub().publish('click', 'global event');
+
+	</script>
   </body>
 </html>
