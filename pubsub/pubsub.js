@@ -14,31 +14,13 @@ function PubSub(){
  * @return {function}         ссылка на handler
  */
 PubSub.prototype.subscribe = function(eventName, handler) {
-	var etable, htable, i, wasNotFound;
+	var etable, i;
 	if ( (eventName == undefined) || (! handler instanceof Function) ) return handler;
 	if (this.table === undefined) this.table = {};						// таблица всех событий
-	if (this.table[eventName] === undefined) this.table[eventName] = {};	// таблица обработчиков данного события
-	etable = this.table[eventName];										// далее реализована попытка решить коллизии при одинаковых текстах функций
-	if ( etable[handler] !== undefined) {								// если похожий обработчик уже есть
-		if ( (etable[handler] instanceof Array) && !(etable[handler] instanceof Function) ) { // и это не массив обработчиков
-			wasNotFound = true;
-			htable = etable[handler];						// в таком массиве перебором ищем нужный обработчик
-			for ( i = 0; i < htable.length; i++) {			// ситуации когда тексты совпадают, но функции разные, будет встречаться не часто
-				if ( htable[i] === handler) {
-					wasNotFound = false;
-					break;
-				}
-			}
-			if ( wasNotFound ) {
-				htable.push(handler);
-			}
-		} else {
-			if ( etable[handler] !== handler ) {
-				etable[handler] = [ etable[handler], handler ];			// пребразуем в массив обработчиков
-			}
-		}
-	} else {
-		etable[handler] = handler;
+	if (this.table[eventName] === undefined) this.table[eventName] = [];// список обработчиков данного события
+	etable = this.table[eventName];										
+	if ( etable.indexOf(handler) === -1 ) {
+		etable.push(handler);
 	}
     return handler;
 };
@@ -50,29 +32,16 @@ PubSub.prototype.subscribe = function(eventName, handler) {
  * @return {function}         ссылка на handler
  */
 PubSub.prototype.unsubscribe = function(eventName, handler) {
-	var etable, htable, i;
+	var etable, i;
 	if ( (eventName == undefined) || (! handler instanceof Function) ) return handler;
 	if ( (this.table !== undefined) && (this.table[eventName] !== undefined) &&
 		(this.table[eventName][handler] !== undefined) ) {
 			etable = this.table[eventName];
-			if ( (etable[handler] instanceof Array) && (!etable[handler] instanceof Function) ) {
-				htable = etable[handler];
-				for ( i = 0; i < htable.length; i++) {			
-					if ( htable[i] === handler) {
-						htable.splice(i, 1);
-						break;									// <--
-					}
-				}
-				if (htable.length == 1)	{	// конвертируем обратно из массива
-					etable[handler] = htable[0];
-				}
-			} else {
-				if ( etable[handler] === handler ) {
-					delete etable[handler];
-				}
+			i = etable.indexOf(handler);
+			if ( i > -1 ) {
+				etable.splice(i, 1);
 			}
 	}
-
     return handler;
 };
 
@@ -83,18 +52,12 @@ PubSub.prototype.unsubscribe = function(eventName, handler) {
  * @return {bool}             удачен ли результат операции
  */
 PubSub.prototype.publish = function(eventName, data) {
-	var etable, htable, i, j, funcs, handler, wasFound = false;
+	var etable, i, wasFound = false;
 	if ( (eventName != undefined) && (this.table !== undefined) && (this.table[eventName] !== undefined) ) {
 		etable = this.table[eventName];
-		funcs = Object.keys(etable);
-		if (funcs.length > 0) wasFound = true;
-		for (i=0; i < funcs.length; i++) {
-			handler = etable[funcs[i]];
-			if (handler instanceof Function)
-				handler(eventName, data);
-			else if (handler instanceof Array)
-				for (j=0; j<handler.length; j++) 
-					handler[j](eventName, data);
+		if ( etable.length>0 ) wasFound = true;
+		for (i=0; i < etable.length; i++) {
+			etable[i](eventName, data);
 		}
 	}
     return wasFound;
